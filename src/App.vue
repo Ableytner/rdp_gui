@@ -6,11 +6,15 @@ import TypesDisplay from './components/TypesDisplay.vue'
 
 import { ValueType } from './scripts/value_type'
 import { Value } from './scripts/value'
+
+import type {SearchParams} from './types/search_params'
 </script>
 
 <script lang="ts">
 export default {
   data() {
+    const search_params: SearchParams = {}
+
     return {
       values: new Array<Value>(),
       value_types: new Array<ValueType>(),
