@@ -14,7 +14,8 @@ export default {
     return {
       values: new Array<Value>(),
       value_types: new Array<ValueType>(),
-      filters: new Map<string, string>()
+      filters: new Map<string, string>(),
+      flags: new Array<string>()
     }
   },
   mounted() {
@@ -37,6 +38,7 @@ export default {
     update_search(args: string[]) {
       console.log('New search arguemnts', args)
       this.filters.clear()
+      this.flags.length = 0
       for (var i = 0; i < args.length; i++) {
         const command = args[i]
         console.log('handling command', command)
@@ -61,6 +63,15 @@ export default {
               this.filters.set("end", value)
               continue
             }
+          }
+        }
+        else if (command_and_args.length == 1) {
+          let flag: string = command_and_args[0]
+          if (flag == "high-to-low"){
+            this.flags.push(flag)
+          }
+          if (flag == "low-to-high"){
+            this.flags.push(flag)
           }
         }
         console.log('Ignoring command', command)
@@ -96,8 +107,15 @@ export default {
         axios
           .get(url, { params: params })
           .then((result) => {
-            // console.log('Got values: ', result.data)
-            accept(result.data)
+            let data: Value[] = result.data
+            // use flags to sort the data
+            if (this.flags.includes("high-to-low")){
+              data.sort((a,b) => (b.value - a.value))
+            }
+            else if (this.flags.includes("low-to-high")){
+              data.sort((a,b) => (a.value - b.value))
+            }
+            accept(data)
           })
           .catch((error) => {
             console.error(error)
