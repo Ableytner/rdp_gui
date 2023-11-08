@@ -27,7 +27,8 @@ export default {
     </span>
   </div>
   <span v-if="!editor_hidden">
-    <!-- :key is needed for v-for to work
+    <!-- create a SingleTypeDisplay for every value_type in value_types
+      :key is needed for v-for to work
       the "update_type" event gets forwarded -->
     <SingleTypeDisplay :type_prop="value_type" v-for="value_type in value_types" :key="value_type" @update_type="$emit('update_type')"/>
   </span>
