@@ -14,9 +14,8 @@ export default {
     return {
       values: new Array<Value>(),
       value_types: new Array<ValueType>(),
-      filter_start : '',
-      filter_end : '',
-      filter_type : ''
+      filters: new Map<string, string>(),
+      flags: new Array<string>()
     }
   },
   mounted() {
@@ -38,26 +37,46 @@ export default {
     },
     update_search(args: string[]) {
       console.log('New search arguemnts', args)
-      this.filter_end=''
-      this.filter_start=''
-      this.filter_type=''
+      this.filters.clear()
+      this.flags.length = 0
       for (var i = 0; i < args.length; i++) {
         const command = args[i]
         console.log('handling command', command)
-        const command_and_args = args[i].split(':')
-        if (command_and_args.length == 2) {
-          const key = command_and_args[0]
-          const value = command_and_args[1]
+        const command_and_args = command.split(':')
+
+        // process flags
+        if (command_and_args.length == 1) {
+          let flag: string = command_and_args[0]
+          if (flag == "high-to-low"){
+            this.flags.push(flag)
+            continue
+          }
+          else if (flag == "low-to-high"){
+            this.flags.push(flag)
+            continue
+          }
+        }
+        // process filters
+        else if (command_and_args.length == 2) {
+          const key = command_and_args[0].trim()
+          const value = command_and_args[1].trim()
           if (key == 'type') {
-            this.filter_type = this.getTypeId(value)
-            console.log('Update typeid', this.filter_type)
-            continue
+            var type_id = this.getTypeId(value)
+            if (type_id != "") {
+              this.filters.set("type_id", type_id)
+              console.log('Update typeid', type_id)
+              continue
+            }
           } else if (key == 'start') {
-            this.filter_start = value
-            continue
+            if (value != "" && !isNaN(+value)) {
+              this.filters.set("start", value)
+              continue
+            }
           } else if (key == 'end') {
-            this.filter_end = value
-            continue
+            if (value != "" && !isNaN(+value)) {
+              this.filters.set("end", value)
+              continue
+            }
           }
         }
         console.log('Ignoring command', command)
@@ -80,21 +99,28 @@ export default {
       const promise = new Promise<Value[]>((accept, reject) => {
         const url = '/api/value/'
         var params : { [key: string]: string } = {}
-        if (this.filter_type != '') {
-          params['type_id'] = this.filter_type
+        if (this.filters.has("type_id")) {
+          params['type_id'] = this.filters.get("type_id")!
         }
-        if (this.filter_end != '') {
-          params['end'] = this.filter_end
+        if (this.filters.has("start")) {
+          params['start']=this.filters.get("start")!
         }
-        if (this.filter_start != '') {
-          params['start']=this.filter_start
+        if (this.filters.has("end")) {
+          params['end'] = this.filters.get("end")!
         }
         console.log('Trying to get url', url)
         axios
           .get(url, { params: params })
           .then((result) => {
-            // console.log('Got values: ', result.data)
-            accept(result.data)
+            let data: Value[] = result.data
+            // use flags to sort the data
+            if (this.flags.includes("high-to-low")){
+              data.sort((a,b) => (b.value - a.value))
+            }
+            else if (this.flags.includes("low-to-high")){
+              data.sort((a,b) => (a.value - b.value))
+            }
+            accept(data)
           })
           .catch((error) => {
             console.error(error)
@@ -115,3 +141,4 @@ export default {
     <ValuesDisplay :values="values" :value_types="value_types" />
   </div>
 </template>
+./scripts/dictionary./types/dictionary@/scripts/types/dictionary
