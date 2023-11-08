@@ -43,7 +43,21 @@ export default {
         const command = args[i]
         console.log('handling command', command)
         const command_and_args = command.split(':')
-        if (command_and_args.length == 2) {
+
+        // process flags
+        if (command_and_args.length == 1) {
+          let flag: string = command_and_args[0]
+          if (flag == "high-to-low"){
+            this.flags.push(flag)
+            continue
+          }
+          else if (flag == "low-to-high"){
+            this.flags.push(flag)
+            continue
+          }
+        }
+        // process filters
+        else if (command_and_args.length == 2) {
           const key = command_and_args[0].trim()
           const value = command_and_args[1].trim()
           if (key == 'type') {
@@ -63,15 +77,6 @@ export default {
               this.filters.set("end", value)
               continue
             }
-          }
-        }
-        else if (command_and_args.length == 1) {
-          let flag: string = command_and_args[0]
-          if (flag == "high-to-low"){
-            this.flags.push(flag)
-          }
-          if (flag == "low-to-high"){
-            this.flags.push(flag)
           }
         }
         console.log('Ignoring command', command)
