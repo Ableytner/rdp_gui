@@ -30,3 +30,61 @@ Updates backend and emits *update_type* if a type_name or type_unit has been cha
 
 ### ValuesDisplay.vue
 Displays the "time", "type", "value" headers and all values received from the backend.
+
+## filters
+All available filters are listed below
+
+### bigger than number
+Show all values that are bigger than a certain number
+
+#### syntax
+value>{some_number}
+
+e.g. value>94
+
+### smaler than number
+Show all values that are smaler than a certain number
+
+#### syntax
+value<{some_number}
+
+e.g. value<94
+
+### is of type
+Show all values that are of a certain type
+
+#### syntax
+type:{some_type}
+
+e.g. type:pressure
+
+### after time
+Show all values that were recorded after a given time
+
+#### syntax
+start:{some_timestamp}
+
+e.g. start:513143224
+
+### before time
+Show all values that were recorded before a given time
+
+#### syntax
+end:{some_timestamp}
+
+e.g. end:3223222344
+
+## flags
+All available flags are listed below
+
+### sort from high
+Sort all values from high to low
+
+#### syntax
+high-to-low
+
+### sort from low
+Sort all values from low to high
+
+#### syntax
+low-to-high
