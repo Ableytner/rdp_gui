@@ -42,11 +42,11 @@ export default {
       for (var i = 0; i < args.length; i++) {
         const command = args[i]
         console.log('handling command', command)
-        const command_and_args = command.split(':')
+        let command_and_args = command.split(':')
 
         // process flags
         if (command_and_args.length == 1) {
-          let flag: string = command_and_args[0]
+          let flag: string = command_and_args[0].trim()
           if (flag == "high-to-low"){
             this.flags.push(flag)
             continue
@@ -79,6 +79,27 @@ export default {
             }
           }
         }
+
+        // process lower than/higher than filters
+        command_and_args = command.split(">")
+        if (command_and_args.length == 2){
+          const key = command_and_args[0].trim()
+          const value = command_and_args[1].trim()
+          if (key == "value" && !isNaN(+value)){
+            this.filters.set("biggerthanvalue", value)
+            continue
+          }
+        }
+        command_and_args = command.split("<")
+        if (command_and_args.length == 2){
+          const key = command_and_args[0].trim()
+          const value = command_and_args[1].trim()
+          if (key == "value" && !isNaN(+value)){
+            this.filters.set("smallerthanvalue", value)
+            continue
+          }
+        }
+
         console.log('Ignoring command', command)
       }
       this.get_values().then((result) => {
@@ -113,13 +134,23 @@ export default {
           .get(url, { params: params })
           .then((result) => {
             let data: Value[] = result.data
+
             // use flags to sort the data
-            if (this.flags.includes("high-to-low")){
+            if (this.flags.includes("high-to-low")) {
               data.sort((a,b) => (b.value - a.value))
             }
-            else if (this.flags.includes("low-to-high")){
+            else if (this.flags.includes("low-to-high")) {
               data.sort((a,b) => (a.value - b.value))
             }
+
+            // use filters to sort the data
+            if (this.filters.has("biggerthanvalue")) {
+              data = data.filter((a) => (a.value > Number(this.filters.get("biggerthanvalue"))))
+            }
+            if (this.filters.has("smallerthanvalue")) {
+              data = data.filter((a) => (a.value < Number(this.filters.get("smallerthanvalue"))))
+            }
+
             accept(data)
           })
           .catch((error) => {
