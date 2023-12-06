@@ -77,6 +77,10 @@ export default {
               this.filters.set("end", value)
               continue
             }
+          } else if (key == "value") {
+            if (value != "" && !isNaN(+value)) {
+              this.filters.set("value", value)
+            }
           }
         }
 
@@ -149,6 +153,9 @@ export default {
             }
             if (this.filters.has("smallerthanvalue")) {
               data = data.filter((a) => (a.value < Number(this.filters.get("smallerthanvalue"))))
+            }
+            if (this.filters.has("value")) {
+              data = data.filter((a) => (a.value.toFixed(2) == this.filters.get("value")))
             }
 
             accept(data)
